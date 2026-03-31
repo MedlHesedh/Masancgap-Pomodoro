@@ -185,7 +185,7 @@ export default function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-500 ${getThemeColor()} flex flex-col items-center py-12 px-4 font-sans text-white`}>
-      <header className="w-full max-w-xl flex justify-between items-center mb-12">
+      <header className="w-full max-w-5xl flex justify-between items-center mb-12">
         <div className="flex items-center gap-2 text-2xl font-bold tracking-tight">
           <Timer className="w-8 h-8" />
           <span>FocusFlow</span>
@@ -198,65 +198,67 @@ export default function App() {
         </button>
       </header>
 
-      <main className="w-full max-w-xl flex flex-col items-center gap-8">
-        {/* Timer Card */}
-        <motion.div 
-          layout
-          className="w-full bg-white/10 backdrop-blur-md rounded-3xl p-8 flex flex-col items-center shadow-2xl border border-white/20"
-        >
-          <div className="flex gap-4 mb-8">
-            {(['work', 'shortBreak', 'longBreak'] as TimerMode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => switchMode(m)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                  mode === m 
-                    ? 'bg-white text-gray-900 shadow-lg' 
-                    : 'hover:bg-white/10 text-white/80'
-                }`}
-              >
-                {m === 'work' ? 'Focus' : m === 'shortBreak' ? 'Short Break' : 'Long Break'}
-              </button>
-            ))}
-          </div>
-
+      <main className="w-full max-w-5xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-12">
+        <div className="w-full lg:w-1/2 flex flex-col items-center gap-8">
+          {/* Timer Card */}
           <motion.div 
-            key={timeLeft}
-            initial={{ scale: 0.95, opacity: 0.8 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-8xl md:text-9xl font-black mb-12 tabular-nums tracking-tighter"
+            layout
+            className="w-full bg-white/10 backdrop-blur-md rounded-3xl p-8 flex flex-col items-center shadow-2xl border border-white/20"
           >
-            {formatTime(timeLeft)}
+            <div className="flex gap-4 mb-8">
+              {(['work', 'shortBreak', 'longBreak'] as TimerMode[]).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => switchMode(m)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    mode === m 
+                      ? 'bg-white text-gray-900 shadow-lg' 
+                      : 'hover:bg-white/10 text-white/80'
+                  }`}
+                >
+                  {m === 'work' ? 'Focus' : m === 'shortBreak' ? 'Short Break' : 'Long Break'}
+                </button>
+              ))}
+            </div>
+
+            <motion.div 
+              key={timeLeft}
+              initial={{ scale: 0.95, opacity: 0.8 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-8xl md:text-9xl font-black mb-12 tabular-nums tracking-tighter"
+            >
+              {formatTime(timeLeft)}
+            </motion.div>
+
+            <div className="flex items-center gap-6">
+              <button
+                onClick={toggleTimer}
+                className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-gray-900 shadow-xl hover:scale-105 active:scale-95 transition-transform"
+              >
+                {isActive ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
+              </button>
+              <button
+                onClick={resetTimer}
+                className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
+              >
+                <RotateCcw className="w-6 h-6" />
+              </button>
+            </div>
           </motion.div>
 
-          <div className="flex items-center gap-6">
-            <button
-              onClick={toggleTimer}
-              className="w-24 h-24 rounded-full bg-white flex items-center justify-center text-gray-900 shadow-xl hover:scale-105 active:scale-95 transition-transform"
-            >
-              {isActive ? <Pause className="w-10 h-10 fill-current" /> : <Play className="w-10 h-10 fill-current ml-1" />}
-            </button>
-            <button
-              onClick={resetTimer}
-              className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors"
-            >
-              <RotateCcw className="w-6 h-6" />
-            </button>
+          {/* Current Focus */}
+          <div className="text-center">
+            <p className="text-white/60 text-sm uppercase tracking-widest font-bold mb-2">
+              {mode === 'work' ? 'Time to focus!' : 'Time for a break!'}
+            </p>
+            <h2 className="text-2xl font-medium">
+              {tasks.find(t => !t.completed)?.text || (mode === 'work' ? 'What are you working on?' : 'Relax and recharge')}
+            </h2>
           </div>
-        </motion.div>
-
-        {/* Current Focus */}
-        <div className="text-center">
-          <p className="text-white/60 text-sm uppercase tracking-widest font-bold mb-2">
-            {mode === 'work' ? 'Time to focus!' : 'Time for a break!'}
-          </p>
-          <h2 className="text-2xl font-medium">
-            {tasks.find(t => !t.completed)?.text || (mode === 'work' ? 'What are you working on?' : 'Relax and recharge')}
-          </h2>
         </div>
 
         {/* Tasks Section */}
-        <div className="w-full bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
+        <div className="w-full lg:w-1/2 bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
