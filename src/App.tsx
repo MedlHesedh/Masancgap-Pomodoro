@@ -27,18 +27,24 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boolean }) => {
-  const isHungry = energy < 30;
   const isSleeping = energy === 0;
+  const isSad = energy > 0 && energy < 30;
+  const isHappy = energy >= 80;
+  const isNormal = !isSleeping && !isSad && !isHappy;
   
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
       {/* Tail */}
       <motion.div
         animate={{ 
-          rotate: isSleeping ? 0 : isHungry ? [0, 5, 0] : [0, 15, 0],
-          scale: isSleeping ? 0.9 : [1, 1.05, 1]
+          rotate: isSleeping ? 0 : isHappy ? [0, 25, 0] : isSad ? [0, 5, 0] : [0, 15, 0],
+          scale: isSleeping ? 0.9 : isHappy ? 1.1 : isSad ? 0.95 : 1
         }}
-        transition={{ duration: isHungry ? 1 : 2, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ 
+          duration: isHappy ? 0.8 : isSad ? 3 : 2, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        }}
         className="absolute bottom-4 right-4 w-16 h-10 bg-orange-400 rounded-full origin-left blur-[1px]"
         style={{ borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%' }}
       >
@@ -48,22 +54,29 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
       {/* Body */}
       <motion.div
         animate={{ 
-          scaleY: isSleeping ? 0.8 : [1, 1.02, 1],
-          y: isPetting ? [0, -5, 0] : isSleeping ? 5 : 0
+          scaleY: isSleeping ? 0.8 : isHappy ? [1, 1.05, 1] : 1,
+          scaleX: isHappy ? [1, 1.02, 1] : 1,
+          y: isPetting ? [0, -8, 0] : isSleeping ? 8 : isSad ? 3 : isHappy ? [0, -4, 0] : 0
         }}
-        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ duration: isHappy ? 1.5 : 2, repeat: Infinity, ease: "easeInOut" }}
         className="relative w-20 h-20 bg-orange-500 rounded-3xl shadow-lg border-b-4 border-orange-700 flex items-center justify-center"
       >
         {/* Ears */}
         <motion.div 
-          animate={{ rotate: isSleeping ? -30 : isHungry ? [-5, 5, -5] : 0 }}
+          animate={{ 
+            rotate: isSleeping ? -40 : isHappy ? [-10, 10, -10] : isSad ? -25 : -15,
+            y: isHappy ? -2 : 0
+          }}
           transition={{ duration: 0.5, repeat: Infinity }}
-          className="absolute -top-6 -left-2 w-8 h-10 bg-orange-500 rounded-t-full rotate-[-15deg] border-t-2 border-orange-300" 
+          className="absolute -top-6 -left-2 w-8 h-10 bg-orange-500 rounded-t-full border-t-2 border-orange-300 origin-bottom" 
         />
         <motion.div 
-          animate={{ rotate: isSleeping ? 30 : isHungry ? [5, -5, 5] : 0 }}
+          animate={{ 
+            rotate: isSleeping ? 40 : isHappy ? [10, -10, 10] : isSad ? 25 : 15,
+            y: isHappy ? -2 : 0
+          }}
           transition={{ duration: 0.5, repeat: Infinity }}
-          className="absolute -top-6 -right-2 w-8 h-10 bg-orange-500 rounded-t-full rotate-[15deg] border-t-2 border-orange-300" 
+          className="absolute -top-6 -right-2 w-8 h-10 bg-orange-500 rounded-t-full border-t-2 border-orange-300 origin-bottom" 
         />
         
         {/* Face */}
@@ -75,15 +88,28 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
                 <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
                 <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
               </>
+            ) : isHappy ? (
+              <>
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2.5 h-2.5 bg-gray-900 rounded-full" 
+                />
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2.5 h-2.5 bg-gray-900 rounded-full" 
+                />
+              </>
             ) : (
               <>
                 <motion.div 
-                  animate={{ height: isHungry ? [2, 2, 2] : [6, 6, 1, 6] }}
+                  animate={{ height: isSad ? 2 : [6, 6, 1, 6] }}
                   transition={{ duration: 3, repeat: Infinity }}
                   className="w-2 bg-gray-900 rounded-full" 
                 />
                 <motion.div 
-                  animate={{ height: isHungry ? [2, 2, 2] : [6, 6, 1, 6] }}
+                  animate={{ height: isSad ? 2 : [6, 6, 1, 6] }}
                   transition={{ duration: 3, repeat: Infinity }}
                   className="w-2 bg-gray-900 rounded-full" 
                 />
@@ -93,10 +119,10 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
           
           {/* Blush */}
           <AnimatePresence>
-            {isPetting && (
+            {(isPetting || isHappy) && (
               <motion.div 
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
+                animate={{ opacity: isHappy ? 0.3 : 0.5 }}
                 exit={{ opacity: 0 }}
                 className="absolute top-10 flex gap-10"
               >
@@ -109,8 +135,12 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
           {/* Nose & Mouth */}
           <div className="mt-2 w-2 h-1 bg-gray-900 rounded-full" />
           <motion.div 
-            animate={{ scaleX: isHungry ? 1.2 : 1 }}
-            className="mt-1 w-4 h-1 border-b-2 border-gray-900/30 rounded-full" 
+            animate={{ 
+              scaleX: isHappy ? 1.5 : isSad ? 0.8 : 1,
+              y: isHappy ? -1 : 0,
+              rotate: isSad ? 180 : 0
+            }}
+            className={`mt-1 w-4 h-1 border-b-2 border-gray-900/30 rounded-full ${isHappy ? 'border-b-rose-400' : ''}`} 
           />
         </div>
 
@@ -119,8 +149,16 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
       </motion.div>
 
       {/* Paws */}
-      <div className="absolute bottom-2 left-6 w-4 h-3 bg-orange-600 rounded-full" />
-      <div className="absolute bottom-2 right-6 w-4 h-3 bg-orange-600 rounded-full" />
+      <motion.div 
+        animate={{ y: isHappy ? [0, -2, 0] : 0 }}
+        transition={{ duration: 0.5, repeat: Infinity }}
+        className="absolute bottom-2 left-6 w-4 h-3 bg-orange-600 rounded-full" 
+      />
+      <motion.div 
+        animate={{ y: isHappy ? [0, -2, 0] : 0 }}
+        transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
+        className="absolute bottom-2 right-6 w-4 h-3 bg-orange-600 rounded-full" 
+      />
 
       {/* Sleep Zzz */}
       <AnimatePresence>
@@ -134,6 +172,21 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
             <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-white font-bold text-lg">Z</motion.span>
             <motion.span animate={{ y: [5, -5, 5], x: [5, 0, 5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} className="text-white/70 font-bold text-sm">z</motion.span>
             <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }} className="text-white/40 font-bold text-xs">z</motion.span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Happy Sparkles */}
+      <AnimatePresence>
+        {isHappy && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 pointer-events-none"
+          >
+            <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} className="absolute -top-2 left-4"><Sparkles className="w-4 h-4 text-yellow-300" /></motion.div>
+            <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.7 }} className="absolute top-4 -right-2"><Sparkles className="w-3 h-3 text-yellow-200" /></motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -281,8 +334,10 @@ export default function App() {
         const next = Math.max(0, prev - decrease);
         
         // Update message based on energy and state
-        if (next < 20) setKitsuneMessage("I'm starving... please complete a task!");
+        if (next === 0) setKitsuneMessage("Zzz... so sleepy... need tasks...");
+        else if (next < 30) setKitsuneMessage("I'm starving... please complete a task!");
         else if (next < 50) setKitsuneMessage("I'm getting a bit hungry. Time to study?");
+        else if (next >= 80) setKitsuneMessage("I'm so happy and full of energy! Let's go!");
         else if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
         else setKitsuneMessage("I'm full and happy! Ready for the next one?");
         
