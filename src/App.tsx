@@ -26,6 +26,121 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boolean }) => {
+  const isHungry = energy < 30;
+  const isSleeping = energy === 0;
+  
+  return (
+    <div className="relative w-32 h-32 flex items-center justify-center">
+      {/* Tail */}
+      <motion.div
+        animate={{ 
+          rotate: isSleeping ? 0 : isHungry ? [0, 5, 0] : [0, 15, 0],
+          scale: isSleeping ? 0.9 : [1, 1.05, 1]
+        }}
+        transition={{ duration: isHungry ? 1 : 2, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute bottom-4 right-4 w-16 h-10 bg-orange-400 rounded-full origin-left blur-[1px]"
+        style={{ borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%' }}
+      >
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full opacity-40 blur-sm" />
+      </motion.div>
+
+      {/* Body */}
+      <motion.div
+        animate={{ 
+          scaleY: isSleeping ? 0.8 : [1, 1.02, 1],
+          y: isPetting ? [0, -5, 0] : isSleeping ? 5 : 0
+        }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        className="relative w-20 h-20 bg-orange-500 rounded-3xl shadow-lg border-b-4 border-orange-700 flex items-center justify-center"
+      >
+        {/* Ears */}
+        <motion.div 
+          animate={{ rotate: isSleeping ? -30 : isHungry ? [-5, 5, -5] : 0 }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="absolute -top-6 -left-2 w-8 h-10 bg-orange-500 rounded-t-full rotate-[-15deg] border-t-2 border-orange-300" 
+        />
+        <motion.div 
+          animate={{ rotate: isSleeping ? 30 : isHungry ? [5, -5, 5] : 0 }}
+          transition={{ duration: 0.5, repeat: Infinity }}
+          className="absolute -top-6 -right-2 w-8 h-10 bg-orange-500 rounded-t-full rotate-[15deg] border-t-2 border-orange-300" 
+        />
+        
+        {/* Face */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center pt-2">
+          {/* Eyes */}
+          <div className="flex gap-6">
+            {isSleeping ? (
+              <>
+                <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
+                <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
+              </>
+            ) : (
+              <>
+                <motion.div 
+                  animate={{ height: isHungry ? [2, 2, 2] : [6, 6, 1, 6] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="w-2 bg-gray-900 rounded-full" 
+                />
+                <motion.div 
+                  animate={{ height: isHungry ? [2, 2, 2] : [6, 6, 1, 6] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                  className="w-2 bg-gray-900 rounded-full" 
+                />
+              </>
+            )}
+          </div>
+          
+          {/* Blush */}
+          <AnimatePresence>
+            {isPetting && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.4 }}
+                exit={{ opacity: 0 }}
+                className="absolute top-10 flex gap-10"
+              >
+                <div className="w-3 h-2 bg-rose-400 rounded-full blur-[2px]" />
+                <div className="w-3 h-2 bg-rose-400 rounded-full blur-[2px]" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Nose & Mouth */}
+          <div className="mt-2 w-2 h-1 bg-gray-900 rounded-full" />
+          <motion.div 
+            animate={{ scaleX: isHungry ? 1.2 : 1 }}
+            className="mt-1 w-4 h-1 border-b-2 border-gray-900/30 rounded-full" 
+          />
+        </div>
+
+        {/* Belly */}
+        <div className="absolute bottom-2 w-10 h-6 bg-orange-100/50 rounded-full blur-[1px]" />
+      </motion.div>
+
+      {/* Paws */}
+      <div className="absolute bottom-2 left-6 w-4 h-3 bg-orange-600 rounded-full" />
+      <div className="absolute bottom-2 right-6 w-4 h-3 bg-orange-600 rounded-full" />
+
+      {/* Sleep Zzz */}
+      <AnimatePresence>
+        {isSleeping && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            className="absolute -top-4 -right-4 flex flex-col gap-2"
+          >
+            <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-white font-bold text-lg">Z</motion.span>
+            <motion.span animate={{ y: [5, -5, 5], x: [5, 0, 5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} className="text-white/70 font-bold text-sm">z</motion.span>
+            <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }} className="text-white/40 font-bold text-xs">z</motion.span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 type SoundType = 'beep' | 'bell' | 'digital' | 'custom';
 
@@ -65,7 +180,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
-  const [hunger, setHunger] = useState(50); // 0 = full, 100 = starving
+  const [energy, setEnergy] = useState(50); // 100 = full, 0 = starving
+  const [isPetting, setIsPetting] = useState(false);
   const [kitsuneMessage, setKitsuneMessage] = useState("Hi! I'm Kitsu. Let's focus together!");
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -158,15 +274,15 @@ export default function App() {
   }, [isActive, timeLeft, mode, settings, switchMode, playNotification]);
 
   useEffect(() => {
-    const hungerInterval = setInterval(() => {
-      setHunger(prev => {
-        // Hunger increases faster if timer is not active during work mode
-        const increase = (!isActive && mode === 'work') ? 2 : 0.5;
-        const next = Math.min(100, prev + increase);
+    const energyInterval = setInterval(() => {
+      setEnergy(prev => {
+        // Energy decreases faster if timer is not active during work mode
+        const decrease = (!isActive && mode === 'work') ? 2 : 0.5;
+        const next = Math.max(0, prev - decrease);
         
-        // Update message based on hunger and state
-        if (next > 80) setKitsuneMessage("I'm starving... please complete a task!");
-        else if (next > 50) setKitsuneMessage("I'm getting a bit hungry. Time to study?");
+        // Update message based on energy and state
+        if (next < 20) setKitsuneMessage("I'm starving... please complete a task!");
+        else if (next < 50) setKitsuneMessage("I'm getting a bit hungry. Time to study?");
         else if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
         else setKitsuneMessage("I'm full and happy! Ready for the next one?");
         
@@ -174,7 +290,7 @@ export default function App() {
       });
     }, 10000); // Check every 10 seconds
 
-    return () => clearInterval(hungerInterval);
+    return () => clearInterval(energyInterval);
   }, [isActive, mode]);
 
   const toggleTimer = () => {
@@ -209,7 +325,7 @@ export default function App() {
     setTasks(tasks.map(t => {
       if (t.id === id && !t.completed) {
         // Feed the kitsune when a task is completed
-        setHunger(prev => Math.max(0, prev - 25));
+        setEnergy(prev => Math.min(100, prev + 25));
         setKitsuneMessage("Yum! That task was delicious!");
         setTimeout(() => {
           if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
@@ -248,9 +364,11 @@ export default function App() {
   };
 
   const handlePetKitsune = () => {
-    setHunger(prev => Math.max(0, prev - 5));
+    setIsPetting(true);
+    setEnergy(prev => Math.min(100, prev + 5));
     setKitsuneMessage("Purr... I love attention! ❤️");
     setTimeout(() => {
+      setIsPetting(false);
       if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
       else setKitsuneMessage("I'm full and happy! Ready for the next one?");
     }, 3000);
@@ -421,8 +539,8 @@ export default function App() {
 
           {/* Kitsune Pet */}
           <motion.div 
-            className="relative flex flex-col items-center mt-8"
-            animate={{ y: [0, -10, 0] }}
+            className="relative flex flex-col items-center mt-8 w-full"
+            animate={{ y: [0, -5, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
             <AnimatePresence>
@@ -431,7 +549,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.8, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="absolute -top-16 bg-white text-gray-900 px-4 py-2 rounded-2xl text-xs font-bold shadow-xl whitespace-nowrap border-2 border-rose-100 z-10"
+                  className="absolute -top-12 bg-white text-gray-900 px-4 py-2 rounded-2xl text-xs font-bold shadow-xl whitespace-nowrap border-2 border-rose-100 z-10"
                 >
                   {kitsuneMessage}
                   <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r-2 border-b-2 border-rose-100 rotate-45" />
@@ -439,40 +557,39 @@ export default function App() {
               )}
             </AnimatePresence>
 
-            <div className="relative">
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+            <div className="flex flex-col items-center gap-4 w-full">
+              <div 
                 onClick={handlePetKitsune}
-                animate={{ 
-                  scale: hunger > 80 ? [1, 0.95, 1] : [1, 1.05, 1],
-                  rotate: hunger > 80 ? [-2, 2, -2] : 0
-                }}
-                transition={{ duration: hunger > 80 ? 0.5 : 2, repeat: Infinity }}
-                className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border-4 cursor-pointer relative group ${
-                  hunger > 80 ? 'bg-orange-100 border-orange-300' : 'bg-orange-500 border-white'
-                }`}
+                className="cursor-pointer relative group"
               >
-                <Cat className={`w-12 h-12 ${hunger > 80 ? 'text-orange-400' : 'text-white'}`} />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Heart className="w-8 h-8 text-white fill-current animate-ping" />
+                <KitsuneSprite energy={energy} isPetting={isPetting} />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <Heart className="w-12 h-12 text-rose-400 fill-current animate-ping" />
                 </div>
-                {hunger < 30 && <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-300 animate-pulse" />}
-                {hunger > 80 && <div className="absolute -bottom-2 text-xl">💢</div>}
-              </motion.div>
+                {energy > 80 && <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-300 animate-pulse" />}
+                {energy < 20 && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 text-2xl">💢</div>}
+              </div>
               
-              {/* Hunger Bar */}
-              <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1">
-                <div className="h-20 w-3 bg-white/20 rounded-full overflow-hidden border border-white/10">
-                  <motion.div 
-                    initial={{ height: '50%' }}
-                    animate={{ height: `${100 - hunger}%` }}
-                    className={`w-full absolute bottom-0 transition-all duration-500 ${
-                      hunger > 80 ? 'bg-rose-400' : hunger > 50 ? 'bg-orange-400' : 'bg-emerald-400'
-                    }`}
-                  />
+              {/* Energy Bar UI */}
+              <div className="w-full max-w-[200px] space-y-1">
+                <div className="flex justify-between items-center px-1">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60 flex items-center gap-1">
+                    <Heart className={`w-3 h-3 ${energy < 20 ? 'animate-pulse text-rose-400' : 'text-rose-300'}`} fill="currentColor" />
+                    Energy
+                  </span>
+                  <span className="text-[10px] font-black text-white/60">{Math.round(energy)}%</span>
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-tighter">Energy</span>
+                <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden border border-white/10 p-[2px]">
+                  <motion.div 
+                    initial={{ width: '50%' }}
+                    animate={{ width: `${energy}%` }}
+                    className={`h-full rounded-full transition-all duration-500 relative overflow-hidden ${
+                      energy < 20 ? 'bg-rose-500' : energy < 50 ? 'bg-orange-400' : 'bg-emerald-400'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+                  </motion.div>
+                </div>
               </div>
             </div>
             <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-white/40">Click to pet Kitsu</p>
