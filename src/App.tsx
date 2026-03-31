@@ -18,7 +18,11 @@ import {
   Brain,
   Timer,
   Upload,
-  Music
+  Music,
+  Cat,
+  MessageCircle,
+  Sparkles,
+  Heart
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -61,6 +65,8 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskText, setNewTaskText] = useState('');
+  const [hunger, setHunger] = useState(50); // 0 = full, 100 = starving
+  const [kitsuneMessage, setKitsuneMessage] = useState("Hi! I'm Kitsu. Let's focus together!");
   
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -151,6 +157,26 @@ export default function App() {
     };
   }, [isActive, timeLeft, mode, settings, switchMode, playNotification]);
 
+  useEffect(() => {
+    const hungerInterval = setInterval(() => {
+      setHunger(prev => {
+        // Hunger increases faster if timer is not active during work mode
+        const increase = (!isActive && mode === 'work') ? 2 : 0.5;
+        const next = Math.min(100, prev + increase);
+        
+        // Update message based on hunger and state
+        if (next > 80) setKitsuneMessage("I'm starving... please complete a task!");
+        else if (next > 50) setKitsuneMessage("I'm getting a bit hungry. Time to study?");
+        else if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
+        else setKitsuneMessage("I'm full and happy! Ready for the next one?");
+        
+        return next;
+      });
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(hungerInterval);
+  }, [isActive, mode]);
+
   const toggleTimer = () => {
     initAudio();
     setIsActive(!isActive);
@@ -180,7 +206,18 @@ export default function App() {
   };
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+    setTasks(tasks.map(t => {
+      if (t.id === id && !t.completed) {
+        // Feed the kitsune when a task is completed
+        setHunger(prev => Math.max(0, prev - 25));
+        setKitsuneMessage("Yum! That task was delicious!");
+        setTimeout(() => {
+          if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
+          else setKitsuneMessage("I'm full and happy! Ready for the next one?");
+        }, 3000);
+      }
+      return t.id === id ? { ...t, completed: !t.completed } : t;
+    }));
   };
 
   const deleteTask = (id: string) => {
@@ -208,6 +245,15 @@ export default function App() {
       });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handlePetKitsune = () => {
+    setHunger(prev => Math.max(0, prev - 5));
+    setKitsuneMessage("Purr... I love attention! ❤️");
+    setTimeout(() => {
+      if (isActive) setKitsuneMessage("You're doing great! Keep focusing!");
+      else setKitsuneMessage("I'm full and happy! Ready for the next one?");
+    }, 3000);
   };
 
   const getThemeColor = () => {
@@ -308,68 +354,129 @@ export default function App() {
           </div>
         </div>
 
-        {/* Tasks Section */}
-        <div className="w-full lg:w-1/2 bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5" />
-              Tasks
-            </h3>
-            <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
-              {tasks.filter(t => t.completed).length}/{tasks.length}
-            </span>
+        <div className="w-full lg:w-1/2 flex flex-col gap-8">
+          {/* Tasks Section */}
+          <div className="w-full bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Tasks
+              </h3>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                {tasks.filter(t => t.completed).length}/{tasks.length}
+              </span>
+            </div>
+
+            <form onSubmit={addTask} className="flex gap-2 mb-6">
+              <input
+                type="text"
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                placeholder="Add a new task..."
+                className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 focus:outline-none focus:border-white/40 placeholder:text-white/40"
+              />
+              <button 
+                type="submit"
+                className="p-2 bg-white text-gray-900 rounded-xl hover:bg-white/90 transition-colors"
+              >
+                <Plus className="w-6 h-6" />
+              </button>
+            </form>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              <AnimatePresence mode="popLayout">
+                {tasks.map((task) => (
+                  <motion.div
+                    key={task.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className={`flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group ${task.completed ? 'opacity-50' : ''}`}
+                  >
+                    <button 
+                      onClick={() => toggleTask(task.id)}
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        task.completed ? 'bg-white border-white' : 'border-white/30 hover:border-white'
+                      }`}
+                    >
+                      {task.completed && <CheckCircle2 className="w-4 h-4 text-gray-900" />}
+                    </button>
+                    <span className={`flex-1 text-sm ${task.completed ? 'line-through' : ''}`}>
+                      {task.text}
+                    </span>
+                    <button 
+                      onClick={() => deleteTask(task.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-300 transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              {tasks.length === 0 && (
+                <p className="text-center text-white/30 py-4 text-sm italic">No tasks yet. Add one to stay focused!</p>
+              )}
+            </div>
           </div>
 
-          <form onSubmit={addTask} className="flex gap-2 mb-6">
-            <input
-              type="text"
-              value={newTaskText}
-              onChange={(e) => setNewTaskText(e.target.value)}
-              placeholder="Add a new task..."
-              className="flex-1 bg-white/10 border border-white/10 rounded-xl px-4 py-2 focus:outline-none focus:border-white/40 placeholder:text-white/40"
-            />
-            <button 
-              type="submit"
-              className="p-2 bg-white text-gray-900 rounded-xl hover:bg-white/90 transition-colors"
-            >
-              <Plus className="w-6 h-6" />
-            </button>
-          </form>
-
-          <div className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-            <AnimatePresence mode="popLayout">
-              {tasks.map((task) => (
-                <motion.div
-                  key={task.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className={`flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group ${task.completed ? 'opacity-50' : ''}`}
+          {/* Kitsune Pet */}
+          <motion.div 
+            className="relative flex flex-col items-center mt-8"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <AnimatePresence>
+              {kitsuneMessage && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="absolute -top-16 bg-white text-gray-900 px-4 py-2 rounded-2xl text-xs font-bold shadow-xl whitespace-nowrap border-2 border-rose-100 z-10"
                 >
-                  <button 
-                    onClick={() => toggleTask(task.id)}
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      task.completed ? 'bg-white border-white' : 'border-white/30 hover:border-white'
-                    }`}
-                  >
-                    {task.completed && <CheckCircle2 className="w-4 h-4 text-gray-900" />}
-                  </button>
-                  <span className={`flex-1 text-sm ${task.completed ? 'line-through' : ''}`}>
-                    {task.text}
-                  </span>
-                  <button 
-                    onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-300 transition-all"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  {kitsuneMessage}
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-r-2 border-b-2 border-rose-100 rotate-45" />
                 </motion.div>
-              ))}
+              )}
             </AnimatePresence>
-            {tasks.length === 0 && (
-              <p className="text-center text-white/30 py-4 text-sm italic">No tasks yet. Add one to stay focused!</p>
-            )}
-          </div>
+
+            <div className="relative">
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handlePetKitsune}
+                animate={{ 
+                  scale: hunger > 80 ? [1, 0.95, 1] : [1, 1.05, 1],
+                  rotate: hunger > 80 ? [-2, 2, -2] : 0
+                }}
+                transition={{ duration: hunger > 80 ? 0.5 : 2, repeat: Infinity }}
+                className={`w-24 h-24 rounded-full flex items-center justify-center shadow-2xl border-4 cursor-pointer relative group ${
+                  hunger > 80 ? 'bg-orange-100 border-orange-300' : 'bg-orange-500 border-white'
+                }`}
+              >
+                <Cat className={`w-12 h-12 ${hunger > 80 ? 'text-orange-400' : 'text-white'}`} />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Heart className="w-8 h-8 text-white fill-current animate-ping" />
+                </div>
+                {hunger < 30 && <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-300 animate-pulse" />}
+                {hunger > 80 && <div className="absolute -bottom-2 text-xl">💢</div>}
+              </motion.div>
+              
+              {/* Hunger Bar */}
+              <div className="absolute -right-16 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1">
+                <div className="h-20 w-3 bg-white/20 rounded-full overflow-hidden border border-white/10">
+                  <motion.div 
+                    initial={{ height: '50%' }}
+                    animate={{ height: `${100 - hunger}%` }}
+                    className={`w-full absolute bottom-0 transition-all duration-500 ${
+                      hunger > 80 ? 'bg-rose-400' : hunger > 50 ? 'bg-orange-400' : 'bg-emerald-400'
+                    }`}
+                  />
+                </div>
+                <span className="text-[8px] font-black uppercase tracking-tighter">Energy</span>
+              </div>
+            </div>
+            <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-white/40">Click to pet Kitsu</p>
+          </motion.div>
         </div>
       </main>
 
