@@ -474,7 +474,7 @@ export default function App() {
       <header className="w-full max-w-5xl flex justify-between items-center mb-12">
         <div className="flex items-center gap-2 text-2xl font-bold tracking-tight">
           <Timer className="w-8 h-8" />
-          <span>FocusFlow</span>
+          <span>Kitsuu</span>
         </div>
         <button 
           onClick={() => setShowSettings(true)}
@@ -577,28 +577,50 @@ export default function App() {
                 {tasks.map((task) => (
                   <motion.div
                     key={task.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className={`flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group ${task.completed ? 'opacity-50' : ''}`}
+                    layout
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ 
+                      opacity: task.completed ? 0.5 : 1, 
+                      y: 0, 
+                      scale: 1,
+                    }}
+                    exit={{ 
+                      opacity: 0, 
+                      scale: 0.9, 
+                      x: -20,
+                      transition: { duration: 0.2 } 
+                    }}
+                    whileHover={{ scale: 1.01 }}
+                    className={`flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 group transition-colors ${task.completed ? 'bg-white/2' : 'hover:bg-white/10'}`}
                   >
-                    <button 
+                    <motion.button 
+                      whileTap={{ scale: 0.8 }}
                       onClick={() => toggleTask(task.id)}
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
                         task.completed ? 'bg-white border-white' : 'border-white/30 hover:border-white'
                       }`}
                     >
-                      {task.completed && <CheckCircle2 className="w-4 h-4 text-gray-900" />}
-                    </button>
-                    <span className={`flex-1 text-sm ${task.completed ? 'line-through' : ''}`}>
+                      {task.completed && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-gray-900" />
+                        </motion.div>
+                      )}
+                    </motion.button>
+                    <span className={`flex-1 text-sm transition-all duration-300 ${task.completed ? 'line-through text-white/40' : ''}`}>
                       {task.text}
                     </span>
-                    <button 
+                    <motion.button 
+                      whileHover={{ scale: 1.2, color: '#fca5a5' }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => deleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-300 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </motion.button>
                   </motion.div>
                 ))}
               </AnimatePresence>
