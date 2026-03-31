@@ -30,88 +30,76 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
   const isSleeping = energy === 0;
   const isSad = energy > 0 && energy < 30;
   const isHappy = energy >= 80;
-  const isNormal = !isSleeping && !isSad && !isHappy;
   
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
-      {/* Tail */}
+      {/* Fluffy Tail */}
       <motion.div
         animate={{ 
-          rotate: isSleeping ? 0 : isHappy ? [0, 25, 0] : isSad ? [0, 5, 0] : [0, 15, 0],
-          scale: isSleeping ? 0.9 : isHappy ? 1.1 : isSad ? 0.95 : 1
+          rotate: isSleeping ? 0 : isHappy ? [0, 40, 0] : isSad ? [0, 5, 0] : [0, 25, 0],
+          scale: isSleeping ? 0.9 : isHappy ? 1.2 : isSad ? 0.95 : 1
         }}
         transition={{ 
-          duration: isHappy ? 0.8 : isSad ? 3 : 2, 
+          duration: isHappy ? 0.5 : isSad ? 3 : 2, 
           repeat: Infinity, 
           ease: "easeInOut" 
         }}
-        className="absolute bottom-4 right-4 w-16 h-10 bg-orange-400 rounded-full origin-left blur-[1px]"
-        style={{ borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%' }}
+        className="absolute bottom-4 right-0 w-24 h-14 bg-orange-500 rounded-full origin-left blur-[0.5px] shadow-sm"
+        style={{ borderRadius: '30% 70% 70% 30% / 50% 50% 50% 50%' }}
       >
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full opacity-40 blur-sm" />
+        {/* Tail Tip (White) */}
+        <div className="absolute right-0 top-0 bottom-0 w-10 bg-white rounded-r-full opacity-90" 
+             style={{ clipPath: 'polygon(40% 0%, 100% 0%, 100% 100%, 0% 100%)' }} />
       </motion.div>
 
-      {/* Body */}
+      {/* Body & Head */}
       <motion.div
         animate={{ 
-          scaleY: isSleeping ? 0.8 : isHappy ? [1, 1.05, 1] : 1,
-          scaleX: isHappy ? [1, 1.02, 1] : 1,
-          y: isPetting ? [0, -8, 0] : isSleeping ? 8 : isSad ? 3 : isHappy ? [0, -4, 0] : 0
+          scaleY: isSleeping ? 0.7 : isHappy ? [1, 1.1, 1] : 1,
+          scaleX: isHappy ? [1, 1.05, 1] : 1,
+          y: isPetting ? [0, -12, 0] : isSleeping ? 12 : isSad ? 5 : isHappy ? [0, -6, 0] : 0
         }}
-        transition={{ duration: isHappy ? 1.5 : 2, repeat: Infinity, ease: "easeInOut" }}
-        className="relative w-20 h-20 bg-orange-500 rounded-3xl shadow-lg border-b-4 border-orange-700 flex items-center justify-center"
+        transition={{ duration: isHappy ? 1 : 2, repeat: Infinity, ease: "easeInOut" }}
+        className="relative w-24 h-20 bg-orange-600 shadow-xl border-b-4 border-orange-800 flex items-center justify-center"
+        style={{ borderRadius: '50% 50% 45% 45% / 70% 70% 30% 30%' }}
       >
-        {/* Ears */}
-        <motion.div 
-          animate={{ 
-            rotate: isSleeping ? -40 : isHappy ? [-10, 10, -10] : isSad ? -25 : -15,
-            y: isHappy ? -2 : 0
-          }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-          className="absolute -top-6 -left-2 w-8 h-10 bg-orange-500 rounded-t-full border-t-2 border-orange-300 origin-bottom" 
-        />
-        <motion.div 
-          animate={{ 
-            rotate: isSleeping ? 40 : isHappy ? [10, -10, 10] : isSad ? 25 : 15,
-            y: isHappy ? -2 : 0
-          }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-          className="absolute -top-6 -right-2 w-8 h-10 bg-orange-500 rounded-t-full border-t-2 border-orange-300 origin-bottom" 
-        />
-        
-        {/* Face */}
-        <div className="relative w-full h-full flex flex-col items-center justify-center pt-2">
-          {/* Eyes */}
-          <div className="flex gap-6">
+        {/* White Muzzle/Chest */}
+        <div className="absolute bottom-0 w-full h-12 bg-white/90 rounded-t-[50%] blur-[0.5px]" 
+             style={{ borderRadius: '50% 50% 0 0 / 100% 100% 0 0' }} />
+
+        {/* Face Content */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center pt-1 z-10">
+          {/* Eyes - More slanted/fox-like */}
+          <div className="flex gap-8">
             {isSleeping ? (
               <>
-                <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
-                <div className="w-3 h-1 bg-gray-900/50 rounded-full" />
+                <div className="w-4 h-1 bg-gray-900/70 rounded-full rotate-[-10deg]" />
+                <div className="w-4 h-1 bg-gray-900/70 rounded-full rotate-[10deg]" />
               </>
             ) : isHappy ? (
               <>
                 <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-2.5 h-2.5 bg-gray-900 rounded-full" 
+                  animate={{ scale: [1, 1.3, 1], rotate: [-10, 10, -10] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-3 h-3 bg-gray-900 rounded-full" 
                 />
                 <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-2.5 h-2.5 bg-gray-900 rounded-full" 
+                  animate={{ scale: [1, 1.3, 1], rotate: [10, -10, 10] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-3 h-3 bg-gray-900 rounded-full" 
                 />
               </>
             ) : (
               <>
                 <motion.div 
-                  animate={{ height: isSad ? 2 : [6, 6, 1, 6] }}
+                  animate={{ height: isSad ? 2 : [7, 7, 1, 7] }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-2 bg-gray-900 rounded-full" 
+                  className="w-2.5 bg-gray-900 rounded-full rotate-[-5deg]" 
                 />
                 <motion.div 
-                  animate={{ height: isSad ? 2 : [6, 6, 1, 6] }}
+                  animate={{ height: isSad ? 2 : [7, 7, 1, 7] }}
                   transition={{ duration: 3, repeat: Infinity }}
-                  className="w-2 bg-gray-900 rounded-full" 
+                  className="w-2.5 bg-gray-900 rounded-full rotate-[5deg]" 
                 />
               </>
             )}
@@ -122,42 +110,69 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
             {(isPetting || isHappy) && (
               <motion.div 
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isHappy ? 0.3 : 0.5 }}
+                animate={{ opacity: isHappy ? 0.4 : 0.7 }}
                 exit={{ opacity: 0 }}
-                className="absolute top-10 flex gap-10"
+                className="absolute top-10 flex gap-14"
               >
-                <div className="w-3 h-2 bg-rose-400 rounded-full blur-[2px]" />
-                <div className="w-3 h-2 bg-rose-400 rounded-full blur-[2px]" />
+                <div className="w-4 h-2 bg-rose-400 rounded-full blur-[3px]" />
+                <div className="w-4 h-2 bg-rose-400 rounded-full blur-[3px]" />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Nose & Mouth */}
-          <div className="mt-2 w-2 h-1 bg-gray-900 rounded-full" />
-          <motion.div 
-            animate={{ 
-              scaleX: isHappy ? 1.5 : isSad ? 0.8 : 1,
-              y: isHappy ? -1 : 0,
-              rotate: isSad ? 180 : 0
-            }}
-            className={`mt-1 w-4 h-1 border-b-2 border-gray-900/30 rounded-full ${isHappy ? 'border-b-rose-400' : ''}`} 
-          />
+          {/* Pointy Snout */}
+          <div className="mt-2 flex flex-col items-center">
+            <div className="w-2 h-2 bg-gray-950 rounded-full shadow-sm" />
+            <motion.div 
+              animate={{ 
+                scaleX: isHappy ? 1.8 : isSad ? 0.6 : 1,
+                y: isHappy ? -1 : 0,
+                rotate: isSad ? 180 : 0
+              }}
+              className={`mt-0.5 w-4 h-0.5 border-b-2 border-gray-900/50 rounded-full ${isHappy ? 'border-b-rose-500' : ''}`} 
+            />
+          </div>
         </div>
-
-        {/* Belly */}
-        <div className="absolute bottom-2 w-10 h-6 bg-orange-100/50 rounded-full blur-[1px]" />
       </motion.div>
 
-      {/* Paws */}
+      {/* Pointy Fox Ears with Black Tips */}
       <motion.div 
-        animate={{ y: isHappy ? [0, -2, 0] : 0 }}
-        transition={{ duration: 0.5, repeat: Infinity }}
-        className="absolute bottom-2 left-6 w-4 h-3 bg-orange-600 rounded-full" 
+        animate={{ 
+          rotate: isSleeping ? -50 : isHappy ? [-20, 20, -20] : isSad ? -40 : -25,
+          y: isHappy ? -6 : 0
+        }}
+        transition={{ duration: 0.3, repeat: Infinity }}
+        className="absolute -top-8 left-2 w-12 h-16 bg-orange-600 rounded-t-[100%] border-t-4 border-orange-400 origin-bottom shadow-md overflow-hidden" 
+      >
+        {/* Black Tip */}
+        <div className="absolute top-0 inset-x-0 h-4 bg-gray-900" />
+        {/* Inner Ear */}
+        <div className="absolute inset-x-2 top-4 bottom-0 bg-orange-200/50 rounded-t-full" />
+      </motion.div>
+      <motion.div 
+        animate={{ 
+          rotate: isSleeping ? 50 : isHappy ? [20, -20, 20] : isSad ? 40 : 25,
+          y: isHappy ? -6 : 0
+        }}
+        transition={{ duration: 0.3, repeat: Infinity }}
+        className="absolute -top-8 right-2 w-12 h-16 bg-orange-600 rounded-t-[100%] border-t-4 border-orange-400 origin-bottom shadow-md overflow-hidden" 
+      >
+        {/* Black Tip */}
+        <div className="absolute top-0 inset-x-0 h-4 bg-gray-900" />
+        {/* Inner Ear */}
+        <div className="absolute inset-x-2 top-4 bottom-0 bg-orange-200/50 rounded-t-full" />
+      </motion.div>
+
+      {/* Paws (Black "Socks") */}
+      <motion.div 
+        animate={{ y: isHappy ? [0, -5, 0] : 0 }}
+        transition={{ duration: 0.4, repeat: Infinity }}
+        className="absolute bottom-2 left-6 w-5 h-5 bg-gray-900 rounded-full border-t-2 border-gray-800" 
       />
       <motion.div 
-        animate={{ y: isHappy ? [0, -2, 0] : 0 }}
-        transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
-        className="absolute bottom-2 right-6 w-4 h-3 bg-orange-600 rounded-full" 
+        animate={{ y: isHappy ? [0, -5, 0] : 0 }}
+        transition={{ duration: 0.4, repeat: Infinity, delay: 0.1 }}
+        className="absolute bottom-2 right-6 w-5 h-5 bg-gray-900 rounded-full border-t-2 border-gray-800" 
       />
 
       {/* Sleep Zzz */}
@@ -167,11 +182,11 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
-            className="absolute -top-4 -right-4 flex flex-col gap-2"
+            className="absolute -top-8 -right-6 flex flex-col gap-2"
           >
-            <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-white font-bold text-lg">Z</motion.span>
-            <motion.span animate={{ y: [5, -5, 5], x: [5, 0, 5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} className="text-white/70 font-bold text-sm">z</motion.span>
-            <motion.span animate={{ y: [-5, 5, -5], x: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }} className="text-white/40 font-bold text-xs">z</motion.span>
+            <motion.span animate={{ y: [-8, 8, -8], x: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity }} className="text-white font-bold text-xl">Z</motion.span>
+            <motion.span animate={{ y: [8, -8, 8], x: [8, 0, 8] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} className="text-white/70 font-bold text-lg">z</motion.span>
+            <motion.span animate={{ y: [-8, 8, -8], x: [0, 8, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 1 }} className="text-white/40 font-bold text-sm">z</motion.span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -185,8 +200,9 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
             exit={{ opacity: 0 }}
             className="absolute inset-0 pointer-events-none"
           >
-            <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }} className="absolute -top-2 left-4"><Sparkles className="w-4 h-4 text-yellow-300" /></motion.div>
-            <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity, delay: 0.7 }} className="absolute top-4 -right-2"><Sparkles className="w-3 h-3 text-yellow-200" /></motion.div>
+            <motion.div animate={{ scale: [1, 1.8, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} className="absolute -top-6 left-2"><Sparkles className="w-6 h-6 text-yellow-300" /></motion.div>
+            <motion.div animate={{ scale: [1, 1.8, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }} className="absolute top-2 -right-6"><Sparkles className="w-5 h-5 text-yellow-200" /></motion.div>
+            <motion.div animate={{ scale: [1, 1.8, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity, delay: 1 }} className="absolute -bottom-4 left-1/2"><Sparkles className="w-4 h-4 text-yellow-100" /></motion.div>
           </motion.div>
         )}
       </AnimatePresence>
