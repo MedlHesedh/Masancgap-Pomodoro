@@ -16,11 +16,14 @@ import {
   VolumeX,
   Coffee,
   Brain,
-  Timer
+  Timer,
+  Upload,
+  Music
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
+type SoundType = 'beep' | 'bell' | 'digital' | 'custom';
 
 interface Task {
   id: string;
@@ -35,6 +38,8 @@ interface Settings {
   autoStartBreaks: boolean;
   autoStartWork: boolean;
   soundEnabled: boolean;
+  soundType: SoundType;
+  customSoundUrl: string | null;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -44,6 +49,8 @@ const DEFAULT_SETTINGS: Settings = {
   autoStartBreaks: false,
   autoStartWork: false,
   soundEnabled: true,
+  soundType: 'beep',
+  customSoundUrl: null,
 };
 
 export default function App() {
@@ -69,22 +76,51 @@ export default function App() {
     if (!settings.soundEnabled || !audioContextRef.current) return;
     
     const ctx = audioContextRef.current;
+
+    if (settings.soundType === 'custom' && settings.customSoundUrl) {
+      const audio = new Audio(settings.customSoundUrl);
+      audio.play().catch(e => console.error("Error playing custom sound:", e));
+      return;
+    }
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5); // A4
-    
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    switch (settings.soundType) {
+      case 'bell':
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.8);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+        break;
+      case 'digital':
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(440, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.05, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+        break;
+      case 'beep':
+      default:
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+        break;
+    }
     
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
-  }, [settings.soundEnabled]);
+  }, [settings.soundEnabled, settings.soundType, settings.customSoundUrl]);
 
   const switchMode = useCallback((newMode: TimerMode) => {
     setMode(newMode);
@@ -157,6 +193,21 @@ export default function App() {
     if (!isActive) {
       setTimeLeft(updated[mode] * 60);
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const url = event.target?.result as string;
+      updateSettings({ 
+        customSoundUrl: url,
+        soundType: 'custom'
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
   const getThemeColor = () => {
@@ -404,6 +455,63 @@ export default function App() {
                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${settings.soundEnabled ? 'left-7' : 'left-1'}`} />
                   </button>
                 </div>
+
+                {settings.soundEnabled && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="space-y-4 pt-4"
+                  >
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest block">Sound Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(['beep', 'bell', 'digital'] as const).map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => updateSettings({ soundType: type })}
+                          className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                            settings.soundType === type 
+                              ? 'bg-rose-50 border-rose-200 text-rose-600' 
+                              : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-gray-100'
+                          }`}
+                        >
+                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                        </button>
+                      ))}
+                      <label className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer flex items-center justify-center gap-2 ${
+                        settings.soundType === 'custom' 
+                          ? 'bg-rose-50 border-rose-200 text-rose-600' 
+                          : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                        <input 
+                          type="file" 
+                          accept="audio/*" 
+                          className="hidden" 
+                          onChange={handleFileUpload}
+                        />
+                        <Upload className="w-3 h-3" />
+                        {settings.customSoundUrl ? 'Customized' : 'Upload'}
+                      </label>
+                    </div>
+                    {settings.soundType === 'custom' && settings.customSoundUrl && (
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-xl">
+                        <Music className="w-4 h-4 text-rose-500" />
+                        <span className="text-[10px] text-gray-500 truncate flex-1">Custom audio loaded</span>
+                        <button 
+                          onClick={() => updateSettings({ customSoundUrl: null, soundType: 'beep' })}
+                          className="text-[10px] text-rose-500 font-bold hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                    <button 
+                      onClick={playNotification}
+                      className="w-full py-2 text-xs font-bold text-rose-500 bg-rose-50 rounded-xl hover:bg-rose-100 transition-colors"
+                    >
+                      Test Sound
+                    </button>
+                  </motion.div>
+                )}
               </div>
 
               <button 
