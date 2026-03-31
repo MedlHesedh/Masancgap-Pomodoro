@@ -30,19 +30,21 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
   const isSleeping = energy === 0;
   const isSad = energy > 0 && energy < 30;
   const isHappy = energy >= 80;
+  const isNeutral = !isSleeping && !isSad && !isHappy;
   
   return (
     <div className="relative w-32 h-32 flex items-center justify-center">
       {/* Fluffy Tail */}
       <motion.div
         animate={{ 
-          rotate: isSleeping ? 0 : isHappy ? [0, 40, 0] : isSad ? [0, 5, 0] : [0, 25, 0],
+          rotate: isSleeping ? 0 : isHappy ? [0, 40, 0] : isSad ? [0, 5, 0] : isNeutral ? [0, 15, 0, 25, 10, 0] : [0, 25, 0],
           scale: isSleeping ? 0.9 : isHappy ? 1.2 : isSad ? 0.95 : 1
         }}
         transition={{ 
-          duration: isHappy ? 0.5 : isSad ? 3 : 2, 
+          duration: isHappy ? 0.5 : isSad ? 3 : isNeutral ? 4 : 2, 
           repeat: Infinity, 
-          ease: "easeInOut" 
+          ease: "easeInOut",
+          times: isNeutral ? [0, 0.1, 0.2, 0.5, 0.8, 1] : undefined
         }}
         className="absolute bottom-4 right-0 w-24 h-14 bg-orange-500 rounded-full origin-left blur-[0.5px] shadow-sm"
         style={{ borderRadius: '30% 70% 70% 30% / 50% 50% 50% 50%' }}
@@ -55,11 +57,15 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
       {/* Body & Head */}
       <motion.div
         animate={{ 
-          scaleY: isSleeping ? 0.7 : isHappy ? [1, 1.1, 1] : 1,
-          scaleX: isHappy ? [1, 1.05, 1] : 1,
+          scaleY: isSleeping ? 0.7 : isHappy ? [1, 1.1, 1] : isNeutral ? [1, 1.02, 1] : 1,
+          scaleX: isHappy ? [1, 1.05, 1] : isNeutral ? [1, 1.01, 1] : 1,
           y: isPetting ? [0, -12, 0] : isSleeping ? 12 : isSad ? 5 : isHappy ? [0, -6, 0] : 0
         }}
-        transition={{ duration: isHappy ? 1 : 2, repeat: Infinity, ease: "easeInOut" }}
+        transition={{ 
+          duration: isHappy ? 1 : isNeutral ? 3 : 2, 
+          repeat: Infinity, 
+          ease: "easeInOut" 
+        }}
         className="relative w-24 h-20 bg-orange-600 shadow-xl border-b-4 border-orange-800 flex items-center justify-center"
         style={{ borderRadius: '50% 50% 45% 45% / 70% 70% 30% 30%' }}
       >
@@ -138,10 +144,14 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
       {/* Pointy Fox Ears with Black Tips */}
       <motion.div 
         animate={{ 
-          rotate: isSleeping ? -50 : isHappy ? [-20, 20, -20] : isSad ? -40 : -25,
+          rotate: isSleeping ? -50 : isHappy ? [-20, 20, -20] : isSad ? -40 : isNeutral ? [-25, -20, -25, -30, -25] : -25,
           y: isHappy ? -6 : 0
         }}
-        transition={{ duration: 0.3, repeat: Infinity }}
+        transition={{ 
+          duration: isHappy ? 0.3 : isNeutral ? 5 : 0.3, 
+          repeat: Infinity,
+          times: isNeutral ? [0, 0.05, 0.1, 0.15, 1] : undefined
+        }}
         className="absolute -top-8 left-2 w-12 h-16 bg-orange-600 rounded-t-[100%] border-t-4 border-orange-400 origin-bottom shadow-md overflow-hidden" 
       >
         {/* Black Tip */}
@@ -151,10 +161,15 @@ const KitsuneSprite = ({ energy, isPetting }: { energy: number; isPetting: boole
       </motion.div>
       <motion.div 
         animate={{ 
-          rotate: isSleeping ? 50 : isHappy ? [20, -20, 20] : isSad ? 40 : 25,
+          rotate: isSleeping ? 50 : isHappy ? [20, -20, 20] : isSad ? 40 : isNeutral ? [25, 30, 25, 20, 25] : 25,
           y: isHappy ? -6 : 0
         }}
-        transition={{ duration: 0.3, repeat: Infinity }}
+        transition={{ 
+          duration: isHappy ? 0.3 : isNeutral ? 5 : 0.3, 
+          repeat: Infinity,
+          delay: isNeutral ? 0.2 : 0,
+          times: isNeutral ? [0, 0.05, 0.1, 0.15, 1] : undefined
+        }}
         className="absolute -top-8 right-2 w-12 h-16 bg-orange-600 rounded-t-[100%] border-t-4 border-orange-400 origin-bottom shadow-md overflow-hidden" 
       >
         {/* Black Tip */}
